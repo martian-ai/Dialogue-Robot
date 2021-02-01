@@ -1,8 +1,9 @@
 # https://github.com/threelittlemonkeys/lstm-crf-pytorch
-# from utils import *
+
 import torch
 import torch.nn as nn
 import torch.utils.data as data
+from dataset import MyDataset
 from utils import log_sum_exp
 from parameters import *
 import sys
@@ -21,10 +22,17 @@ class rnn_crf(nn.Module):
     def forward(self, xc, xw, y0): # for training
 
         self.zero_grad()
+        # self.rnn.batch_size = y0.size(0)
+        # self.crf.batch_size = y0.size(0)
         self.rnn.batch_size = y0.size(0)
         self.crf.batch_size = y0.size(0)
-        #mask = y0[:, 1:].gt(PAD_IDX).float()
-        mask = torch.Tensor([[1]*y0.size(1) ] * y0.size(0))
+        mask = y0[:, 1:].gt(PAD_IDX).float() # TODO
+        mask = torch.LongTensor([[1.]*32 ]*self.crf.batch_size)
+        xc = y0[:, 1:].gt(PAD_IDX).float()
+        xc = torch.LongTensor([[1.]*64]*self.crf.batch_size)
+        xw = y0[:, 1:].gt(PAD_IDX).float()
+        xw = torch.LongTensor([[1.]*64]*self.crf.batch_size)
+
         h = self.rnn(xc, xw, mask)
         Z = self.crf.forward(h, mask)
         score = self.crf.score(h, y0, mask)
@@ -75,15 +83,9 @@ class rnn(nn.Module):
         hs = self.init_state(self.batch_size)
         x = self.embed(xc, xw)
         # if HRE: # [B * doc_len, 1, H] -> [B, doc_len, H]
-        if True: # [B * doc_len, 1, H] -> [B, doc_len, H]
-            x = x.view(self.batch_size, -1, EMBED_SIZE)
+        #     x = x.view(self.batch_size, -1, EMBED_SIZE)
         lens = mask.sum(1).int().cpu()
         x = nn.utils.rnn.pack_padded_sequence(x, lens, batch_first = True, enforce_sorted = False)
-        print('x'*100)
-        print(x)
-        print("hs"*100)
-        print(hs)
-        print(type(hs))
         h, _ = self.rnn(x, hs)
         h, _ = nn.utils.rnn.pad_packed_sequence(h, batch_first = True)
         h = self.out(h)
@@ -124,8 +126,7 @@ class crf(nn.Module):
         score = Tensor(self.batch_size).fill_(0.)
         h = h.unsqueeze(3)
         trans = self.trans.unsqueeze(2)
-        # for t in range(h.size(1)-1): # recursion through the sequence
-        for t in range(h.size(1)-1): # recursion through the sequence
+        for t in range(h.size(1)): # recursion through the sequence
             mask_t = mask[:, t]
             emit_t = torch.cat([h[t, y0[t + 1]] for h, y0 in zip(h, y0)])
             trans_t = torch.cat([trans[y0[t + 1], y0[t]] for y0 in y0])
@@ -164,47 +165,23 @@ class crf(nn.Module):
 
         return best_path
 
-
-
-class MyDataset(data.Dataset):
-    def __init__(self, xc, xw, labels):
-        self.xc = xc
-        self.xw = xw
-        self.labels = labels
-
-    def __getitem__(self, index):#返回的是tensor
-        xc, xw, labels = self.xc[index], self.xw[index], self.labels[index]
-        return xc, xw, labels
-
-    def __len__(self):
-        return len(self.xc)
-
-dataset = MyDataset( torch.LongTensor([np.random.randint(0,5000,size=64)] *1000 ), torch.LongTensor([np.random.randint(0,5000,size=64)] *1000 ), (torch.LongTensor([np.random.randint(0,10,size=64)] *1000 ) ) )
-# dataset = MyDataset( torch.randn(1000, 64, 300).numpy(), torch.randn(1000, 64, 300).numpy(), [np.random.randint(0,10,size=64)] *1000 )  
-train_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True)
-
 if __name__ == '__main__':
-
-    model = rnn_crf(5000, 5000, 10)
+    batch_size = 500
+    dataset = MyDataset( torch.LongTensor([np.random.randint(0,500,size=64)] *1000 ), torch.LongTensor([np.random.randint(0,500,size=64)] *1000 ), (torch.LongTensor([[3]*64] *1000 ) ) )
+    train_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    model = rnn_crf(500, 500, 5) # 字向量维度， 词向量维度， 标签个数
     optim = torch.optim.Adam(model.parameters(), lr = LEARNING_RATE)
-
     print(model)
-
-    for ei in range(10):
+    for ei in range(10): # 运行10轮
         loss_sum = 0
         for xc, xw, y0 in train_loader:
-            print("*"*100)
-            print('xc')
-            print(xc)
-            print('*'*100)
-            print('xw')
-            print(xw)
-            print("*"*100)
-            print('y0')
-            print(y0)
             loss = model(xc, xw, y0) # forward pass and compute loss
             loss.backward() # compute gradients
             optim.step() # update parameters
             loss_sum += loss.item()
-        loss_sum /= len(batch)
+            # print(loss_sum)
+        loss_sum /= batch_size
         print(loss_sum)
+
+    # 0.1351586265563965
+    # 0.01987993907928467
