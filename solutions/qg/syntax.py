@@ -9,9 +9,7 @@ def question_generate_by_syntax(line, exist_questions, law=''):
     clean_line = line_cleanser(line)
     words, pos, ner = lexical_analysis(clean_line)
     prefix = '' if not law else '根据《'+law+'》，'
-    if '本办法' in line or '本法规' in line or '本提案' in line or \
-        '本条例' in line or '本规定' in line or '该办法' in line or '该法规' \
-        in line or '该提案' in line or '该条例' in line or '该规定' in line:
+    if '本办法' in line or '本法规' in line or '本提案' in line or  '本条例' in line or '本规定' in line or '该办法' in line or '该法规'  in line or '该提案' in line or '该条例' in line or '该规定' in line:
         prefix = ''
     if '应当' in words:
         first, second = clean_line.split('应当')[:2]
@@ -104,3 +102,8 @@ def question_generate_by_syntax(line, exist_questions, law=''):
                         safe_add(question, line, exist_questions, questions, answers)
 
     return questions, answers
+
+
+if __name__ == '__main__':
+    question_generate_by_syntax('国务院规定农民工工资不能拖欠'，[]）
+
