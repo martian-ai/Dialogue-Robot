@@ -25,19 +25,19 @@ def pos(input_text, words=None):
         pos_tags = postagger.postag(words)  
         return list(pos_tags) 
 
-def ner(input_text, words=None, pos=None):
-    if not words and pos :
-        words = seg(input_text)
-        return list(recognizer.recognize(words, pos))
-    elif not pos and words:
-        pos = pos(input_text, words)
-        return list(recognizer.recognize(words, pos))
-    elif not words and not pos:
+def ner(input_text, _words=None, _pos=None):
+    if not _words and _pos:
+        _words = seg(input_text)
+        return list(recognizer.recognize(_words, _pos))
+    elif not _pos and _words:
+        _pos = _pos(input_text, _words)
+        return list(recognizer.recognize(_words, _pos))
+    elif not _words and not _pos:
         tmp_words = seg(input_text)
         tmp_pos = pos(input_text, tmp_words)
         return list(recognizer.recognize(tmp_words, tmp_pos))
     else:
-        return list(recognizer.recognize(words, pos))
+        return list(recognizer.recognize(_words, _pos))
 
 if __name__ == "__main__":
     # print(seg('今天上班给老人让坐，四十分鐘的車程')) 
