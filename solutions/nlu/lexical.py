@@ -12,32 +12,38 @@ postagger.load(pos_model_path)
 recognizer = NamedEntityRecognizer()  
 recognizer.load(ner_model_path)  
 
-def seg(input_text:str):
+def segment(input_text:str):
     words = segmentor.segment(input_text) 
     return list(words) 
 
-def pos(input_text, words=None):
+def pos_tagging(input_text, words=None):
     if not words:
-        words = seg(input_text)
+        words = segment(input_text)
         pos_tags = postagger.postag(words)  
         return list(pos_tags) 
     else:
         pos_tags = postagger.postag(words)  
         return list(pos_tags) 
 
-def ner(input_text, _words=None, _pos=None):
-    if not _words and _pos:
-        _words = seg(input_text)
-        return list(recognizer.recognize(_words, _pos))
-    elif not _pos and _words:
-        _pos = _pos(input_text, _words)
-        return list(recognizer.recognize(_words, _pos))
-    elif not _words and not _pos:
-        tmp_words = seg(input_text)
-        tmp_pos = pos(input_text, tmp_words)
+def name_entity(input_text, words=None, pos=None):
+    if not words and pos:
+        words = segment(input_text)
+        return list(recognizer.recognize(words, pos))
+    elif not pos and words:
+        pos = pos_tagging(input_text, words)
+        return list(recognizer.recognize(words, pos))
+    elif not words and not pos:
+        tmp_words = segment(input_text)
+        tmp_pos = pos_tagging(input_text, tmp_words)
         return list(recognizer.recognize(tmp_words, tmp_pos))
     else:
-        return list(recognizer.recognize(_words, _pos))
+        return list(recognizer.recognize(words, pos))
+
+def lexical_analysis(input_text):
+    seg = segment(input_text)
+    pos = pos_tagging(input_text, seg)
+    ner = name_entity(input_text, pos)
+    return seg, pos, ner
 
 if __name__ == "__main__":
     # print(seg('今天上班给老人让坐，四十分鐘的車程')) 

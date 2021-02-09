@@ -54,6 +54,58 @@ over Knowledge Bases](https://myahya.org/publications/neqa-abujabal-www2018.pdf)
 + [thu rc papers](https://github.com/thunlp/RCPapers)
 + [A Large-Scale Chinese Short-Text Conversation Dataset](https://arxiv.org/pdf/2008.03946.pdf)
 + [UniLM](https://github.com/microsoft/unilm)
++ [ChineseSemanticKB](https://github.com/liuhuanyong/ChineseSemanticKB)
++ [QA-Survey](https://github.com/BDBC-KG-NLP/QA-Survey)
++ https://github.com/WenDesi/lihang_book_algorithm
++ https://github.com/kushalj001/pytorch-question-answering 形式不错，使用ipynb 做原理解释和代码展示
++ https://github.com/luopeixiang/named_entity_recognition sequence labeling 的一些整理，方法比较全
++ https://github.com/quincyliang/nlp-data-augmentation 语料增强
++ [DialoGTP](https://github.com/microsoft/DialoGPT) 
++ [NN-Brain](https://github.com/gyyang/nn-brain)
++ [ACL 2020 Tutorial:Open-Domain Question Answering](https://github.com/danqi/acl2020-openqa-tutorial)
++ [statistical learning method](https://github.com/Dod-o/Statistical-Learning-Method_Code)
++ [CDial-GPT](https://github.com/thu-coai/CDial-GPT)
++ [MRPC](https://github.com/shuohangwang/mprc) 检索和阅读放一起
++ [Awesome-QG](https://github.com/bisheng/Awesome-QG)
++ [Joint-MRC](https://github.com/caishiqing/joint-mrc) 检索和阅读放一起
++ [Capsule-MRC](https://github.com/freefuiiismyname/capsule-mrc)
++ [DRCD](https://github.com/DRCKnowledgeTeam/DRCD)
++ [刘建平博客代码](https://github.com/ljpzzz/machinelearning)
++ [SemEval-2016 Task 9](https://github.com/HIT-SCIR/SemEval-2016)
++ [TopicModelling](https://github.com/balikasg/topicModelling)
++ [lightKG](https://github.com/smilelight/lightKG)
++ [CLUEPretrainedModels](https://github.com/CLUEbenchmark/CLUEPretrainedModels)
++ [CLUEDatasetSearch](https://github.com/CLUEbenchmark/CLUEDatasetSearch)
++ [OpenBookQA](https://github.com/allenai/OpenBookQA)
++ [CMRC2018](https://github.com/ymcui/cmrc2018)
++ [CMRC2017](https://github.com/ymcui/cmrc2017)
++ [PRML](https://github.com/ctgk/PRML)
++ [AWESOME-VAES](https://github.com/matthewvowels1/Awesome-VAEs)
++ [PYGCN](https://github.com/tkipf/pygcn)
++ [IMN](https://github.com/JasonForJoy/IMN)
++ [HarvestText](https://github.com/blmoistawinde/HarvestText)
++ [Chatbot_CN](https://github.com/charlesXu86/Chatbot_CN) 完整例子
++ [Chinese2Digits](https://github.com/Wall-ee/chinese2digits) 中文转数字
++ [pytorch-metric-learning](https://github.com/KevinMusgrave/pytorch-metric-learning)
++ [huggingface/tokenizers](https://github.com/huggingface/tokenizers)
++ [correction](https://github.com/ccheng16/correction)
++ [K-BERT](https://github.com/autoliuweijie/K-BERT)
++ [Multi Step Reasoning for Open Domain Question Answering](https://github.com/rajarshd/Multi-Step-Reasoning)
++ [Chinese-NLP-Corpus](https://github.com/OYE93/Chinese-NLP-Corpus)
++ [CLUE](https://github.com/CLUEbenchmark/CLGE)
++ [hanzi char featurizer](https://github.com/howl-anderson/hanzi_char_featurizer)
++ [abbreviation](https://github.com/zhangyics/Chinese-abbreviation-dataset)
++ [awesome-nlg](https://github.com/tokenmill/awesome-nlg)
++ [GPT2-chitchat](https://github.com/yangjianxin1/GPT2-chitchat)
++ [ChatterBot Language Training Corpus](https://github.com/gunthercox/chatterbot-corpus)
++ [Seq2seqChatbots](https://github.com/ricsinaruto/Seq2seqChatbots) tensor2tensor
++ [Kernelized Bayesian Softmax for Text Generation](https://github.com/NingMiao/KerBS)
++ [Awesome-Chatbot](https://github.com/fendouai/Awesome-Chatbot)
++ [KnowledgeGraph](https://github.com/ownthink/KnowledgeGraph)
++ [CTRL](https://github.com/salesforce/ctrl)
++ [TG-Reading-List](https://github.com/Apollo2Mars?after=Y3Vyc29yOnYyOpK5MjAxOS0wOS0yM1QxNTo1ODo1MCswODowMM4LLtIm&tab=stars) 清华text generation paper list
++ [MulitQA](https://github.com/alontalmor/MultiQA) 
++ [GPT2-Chinese](https://github.com/Morizeyao/GPT2-Chinese)
 
 ## Readed
 
