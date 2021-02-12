@@ -18,7 +18,7 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
 import os,sys
 sys.path.append('../../../')
 
-from examples.orqa.elastic_search import es_search
+from solutions.qa.orqa.elastic_search import es_search
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,8 @@ def to_list(tensor): # Tddo move to utils
 
 def get_search_results(query, search_engine='offline-es'):
     if search_engine == 'offline-es':
-        results_search = es_search(query, 'three-body')
+        #results_search = es_search(query, 'three-body')
+        results_search = es_search(query, 'test-index')
         print(results_search)
 
         score_list, text_list = [], []

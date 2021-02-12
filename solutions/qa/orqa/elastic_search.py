@@ -61,8 +61,8 @@ def es_search(search_query, es_index_name):
     return res
 
 if __name__ == "__main__":
-    # ES_TEST_INDEX = 'test-index'
-    ES_TEST_INDEX = 'three-body'
+    ES_TEST_INDEX = 'test-index'
+    #ES_TEST_INDEX = 'three-body'
     path = '../../resources/corpus/document/三体.txt'
     lines = get_data(path)
     paras = paragraph_chunking(lines, 384)

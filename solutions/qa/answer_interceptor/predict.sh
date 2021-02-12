@@ -8,5 +8,5 @@ python -B interactive.py \
   --do_lower_case \
   --per_gpu_train_batch_size 24 \
   --max_seq_length 384 \
-  --state_dict '/export/home/sunhongchao1/dialogue-system/resources/models/mrc/checkpoint-11850/pytorch_model.bin' \
+  --state_dict '../../../resources/models/mrc/pytorch_model.bin' \
   --doc_stride 128

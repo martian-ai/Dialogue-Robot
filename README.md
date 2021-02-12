@@ -37,7 +37,7 @@
   + 3.2 思考知识和逻辑的表示方式，构建知识和逻辑的表示形式
   + 3.3 构建知识挖掘相关方法，动态维护知识库，并进行逻辑进化
   + 3.4 利用知识库进行知识推理
-+ 4. 搭建Chatbot系统，调优多轮检索和多轮生成相关能力(2.1-2.15)
++ 4. 搭建Chatbot系统，调优多轮检索和多轮生成相关能力(2.1-2.15) 
   + 4.1 尝试强化学习(Policy-based/Vaule-based/A2C)等方式
   + 4.2 尝试GAN(SeqGAN/...)等生成模型
   + 4.3 多轮检索模型迭代优化
@@ -59,3 +59,8 @@ over Knowledge Bases](https://myahya.org/publications/neqa-abujabal-www2018.pdf)
 
 + [thu OpenQA](https://github.com/thunlp/OpenQA)
 + [Multi-Passage Machine Reading Comprehension with Cross-Passage Answer Verification](https://arxiv.org/pdf/1805.02220.pdf)
+
+
+## 后续思路
+
++ 输入是一系列文档，根据文档产生对话能力 
