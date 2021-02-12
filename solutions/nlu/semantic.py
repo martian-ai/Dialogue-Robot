@@ -1,6 +1,6 @@
 from pyltp import SementicRoleLabeller
 from solutions.nlu import label_model_path
-from solutions.nlu.lexical import seg, pos, ner
+from solutions.nlu.lexical import segment, pos_tagging, name_entity
 from solutions.nlu.syntax import dp
 
 labeler = SementicRoleLabeller()

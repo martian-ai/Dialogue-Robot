@@ -2,9 +2,11 @@
 import re
 import jieba
 import smoothnlp
-from utils import line_cleanser, safe_add
+import sys
+sys.path.append('../..')
+from solutions.qg.utils import line_cleanser, safe_add
 
-def question_generate_by_rule(line, law, exist_questions):
+def question_generate_by_rule(line, exist_questions=set(), law=''):
     questions = []
     answers =  []
     clean_line = line_cleanser(line)
@@ -30,7 +32,7 @@ def question_generate_by_rule(line, law, exist_questions):
     if '负责' in seg_words and len(clean_line.split('负责')) == 2:
         role, duty = clean_line.split('负责')
         duty = duty.replace('。' , '')
-        entries = smoothnlp.postag(role)
+        entries = smoothnlp.postag(role) # TODO smoothnlp 换成 ltp
         postags = [entry['postag'] for entry in entries]
         tags_lists = sorted(list(set(postags)))
         if tags_lists == ['NN'] or tags_lists == ['CC','NN']:

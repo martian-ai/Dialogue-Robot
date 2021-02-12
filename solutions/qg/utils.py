@@ -1,3 +1,4 @@
+import re
 
 def line_cleanser(line):
     clean_line = re.sub('第.*?条', '', line) 
@@ -10,7 +11,7 @@ def line_cleanser(line):
 def safe_add(question, a, exist_questions, questions, answers):
     if question not in exist_questions:
         """
-            句子中，；：超过2个就不输出
+        句子中，；：超过2个就不输出
         """
         sep_counter = 0
         for char in question:

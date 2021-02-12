@@ -1,4 +1,4 @@
-from solutions.nlu.lexical import seg, pos, ner
+from solutions.nlu.lexical import segment, pos_tagging, name_entity
 from solutions.nlu import parser_model_path
 from pyltp import Parser
 
@@ -11,9 +11,9 @@ def func():
 
 def dp(input_text:str, words = None, pos = None, show=False):
     if not words:
-        words = seg(input_text)
+        words = segment(input_text)
     if not pos:
-        pos = pos(input_text)
+        pos = pos_tagging(input_text)
 
     arcs = parser.parse(words, pos)  
     if show:
