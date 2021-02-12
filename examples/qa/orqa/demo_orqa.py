@@ -17,7 +17,7 @@ def orqa_nlu(query, history):
 	"""
 	return {'query':query}
 
-def orqa_search(nlu_results):
+def orqa_search(nlu_results, es_index_name):
 	"""
 	section : search 
 	a. 问句改写
@@ -29,7 +29,7 @@ def orqa_search(nlu_results):
 		1. 使用selector 模块，结合对话历史，用户画像，系统设定
 		2. 
 	"""
-	return es_search(nlu_results['query'])
+	return es_search(nlu_results['query'], es_index_name)
 
 
 def orqa_interceptor(results_search):
@@ -41,7 +41,8 @@ def orqa_interceptor(results_search):
 if __name__ == "__main__":
 	history = ['','']
 	query = '云天明送给程心的行星叫什么名字'
+	es_index_name = 'three-body'
 
 	results_nlu = orqa_nlu(query, history)
-	results_search = orqa_search(results_nlu)
+	results_search = orqa_search(results_nlu, es_index_name)
 	print(results_search)

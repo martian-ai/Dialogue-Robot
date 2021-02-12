@@ -47,28 +47,34 @@
 + 8. 基于flask 等工具进行部署，对外提供服务
 
 ## Reading
-
-+ [Never-Ending Learning for Open-Domain Question Answering
-over Knowledge Bases](https://myahya.org/publications/neqa-abujabal-www2018.pdf)
-+ [ELI5:Long From Question Answering](https://arxiv.org/pdf/1907.09190.pdf)
 + [thu rc papers](https://github.com/thunlp/RCPapers)
++ [QA-Survey](https://github.com/BDBC-KG-NLP/QA-Survey)
++ [pytorch-question-answering](https://github.com/kushalj001/pytorch-question-answering) 形式不错，使用ipynb 做原理解释和代码展示
++ [MRPC](https://github.com/shuohangwang/mprc) 检索和阅读放一起
++ [Awesome-QG](https://github.com/bisheng/Awesome-QG)
++ [Joint-MRC](https://github.com/caishiqing/joint-mrc) 检索和阅读放一起
++ [Capsule-MRC](https://github.com/freefuiiismyname/capsule-mrc)
++ [OpenBookQA](https://github.com/allenai/OpenBookQA)
++ [CMRC2018](https://github.com/ymcui/cmrc2018)
++ [CMRC2017](https://github.com/ymcui/cmrc2017)
++ [MulitQA](https://github.com/alontalmor/MultiQA) 
++ [DocumentQA](https://github.com/allenai/document-qa)
++ [Multi Step Reasoning for Open Domain Question Answering](https://github.com/rajarshd/Multi-Step-Reasoning)
++ [Chinese-RC-Datasets](https://github.com/ymcui/Chinese-RC-Datasets)
+
++ [Never-Ending Learning for Open-Domain Question Answering over Knowledge Bases](https://myahya.org/publications/neqa-abujabal-www2018.pdf)
++ [ELI5:Long From Question Answering](https://arxiv.org/pdf/1907.09190.pdf)
 + [A Large-Scale Chinese Short-Text Conversation Dataset](https://arxiv.org/pdf/2008.03946.pdf)
 + [UniLM](https://github.com/microsoft/unilm)
 + [ChineseSemanticKB](https://github.com/liuhuanyong/ChineseSemanticKB)
-+ [QA-Survey](https://github.com/BDBC-KG-NLP/QA-Survey)
-+ https://github.com/WenDesi/lihang_book_algorithm
-+ https://github.com/kushalj001/pytorch-question-answering 形式不错，使用ipynb 做原理解释和代码展示
-+ https://github.com/luopeixiang/named_entity_recognition sequence labeling 的一些整理，方法比较全
-+ https://github.com/quincyliang/nlp-data-augmentation 语料增强
++ [lihang_book_algorithm](https://github.com/WenDesi/lihang_book_algorithm)
++ [named entity recognition](https://github.com/luopeixiang/named_entity_recognition) sequence labeling 的一些整理，方法比较全
++ [nlp-data-augmentation](https://github.com/quincyliang/nlp-data-augmentation) 语料增强
 + [DialoGTP](https://github.com/microsoft/DialoGPT) 
 + [NN-Brain](https://github.com/gyyang/nn-brain)
 + [ACL 2020 Tutorial:Open-Domain Question Answering](https://github.com/danqi/acl2020-openqa-tutorial)
 + [statistical learning method](https://github.com/Dod-o/Statistical-Learning-Method_Code)
 + [CDial-GPT](https://github.com/thu-coai/CDial-GPT)
-+ [MRPC](https://github.com/shuohangwang/mprc) 检索和阅读放一起
-+ [Awesome-QG](https://github.com/bisheng/Awesome-QG)
-+ [Joint-MRC](https://github.com/caishiqing/joint-mrc) 检索和阅读放一起
-+ [Capsule-MRC](https://github.com/freefuiiismyname/capsule-mrc)
 + [DRCD](https://github.com/DRCKnowledgeTeam/DRCD)
 + [刘建平博客代码](https://github.com/ljpzzz/machinelearning)
 + [SemEval-2016 Task 9](https://github.com/HIT-SCIR/SemEval-2016)
@@ -76,9 +82,6 @@ over Knowledge Bases](https://myahya.org/publications/neqa-abujabal-www2018.pdf)
 + [lightKG](https://github.com/smilelight/lightKG)
 + [CLUEPretrainedModels](https://github.com/CLUEbenchmark/CLUEPretrainedModels)
 + [CLUEDatasetSearch](https://github.com/CLUEbenchmark/CLUEDatasetSearch)
-+ [OpenBookQA](https://github.com/allenai/OpenBookQA)
-+ [CMRC2018](https://github.com/ymcui/cmrc2018)
-+ [CMRC2017](https://github.com/ymcui/cmrc2017)
 + [PRML](https://github.com/ctgk/PRML)
 + [AWESOME-VAES](https://github.com/matthewvowels1/Awesome-VAEs)
 + [PYGCN](https://github.com/tkipf/pygcn)
@@ -90,7 +93,6 @@ over Knowledge Bases](https://myahya.org/publications/neqa-abujabal-www2018.pdf)
 + [huggingface/tokenizers](https://github.com/huggingface/tokenizers)
 + [correction](https://github.com/ccheng16/correction)
 + [K-BERT](https://github.com/autoliuweijie/K-BERT)
-+ [Multi Step Reasoning for Open Domain Question Answering](https://github.com/rajarshd/Multi-Step-Reasoning)
 + [Chinese-NLP-Corpus](https://github.com/OYE93/Chinese-NLP-Corpus)
 + [CLUE](https://github.com/CLUEbenchmark/CLGE)
 + [hanzi char featurizer](https://github.com/howl-anderson/hanzi_char_featurizer)
@@ -103,9 +105,28 @@ over Knowledge Bases](https://myahya.org/publications/neqa-abujabal-www2018.pdf)
 + [Awesome-Chatbot](https://github.com/fendouai/Awesome-Chatbot)
 + [KnowledgeGraph](https://github.com/ownthink/KnowledgeGraph)
 + [CTRL](https://github.com/salesforce/ctrl)
-+ [TG-Reading-List](https://github.com/Apollo2Mars?after=Y3Vyc29yOnYyOpK5MjAxOS0wOS0yM1QxNTo1ODo1MCswODowMM4LLtIm&tab=stars) 清华text generation paper list
-+ [MulitQA](https://github.com/alontalmor/MultiQA) 
++ [TG-Reading-List](https://github.com/THUNLP-MT/TG-Reading-List) 清华text generation paper list
 + [GPT2-Chinese](https://github.com/Morizeyao/GPT2-Chinese)
++ [Awesome production machine learning](https://github.com/EthicalML/awesome-production-machine-learning)
++ [Machine-Learning-with-Python](https://github.com/susanli2016/Machine-Learning-with-Python)
++ [FARM](https://github.com/deepset-ai/FARM) 
++ [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python)
++ [combo](https://github.com/yzhao062/combo)
++ [awesome-automl-and-lightweight-models](https://github.com/guan-yuan/awesome-AutoML-and-Lightweight-Models)
++ [deeplearning-models](https://github.com/rasbt/deeplearning-models) nn 
++ [EfficientNet-PyTorch](https://github.com/lukemelas/EfficientNet-PyTorch)
++ [mmf](https://github.com/facebookresearch/mmf)
++ [reinforcement-learning](https://github.com/dennybritz/reinforcement-learning)
++ [Evolutionary-Algorithm](https://github.com/MorvanZhou/Evolutionary-Algorithm)
++ [Awesome-Chinese-NLP](https://github.com/crownpku/Awesome-Chinese-NLP)
++ [awesome-domain-adaptation](awsome-domain-adaptation)
++ [tpot](https://github.com/EpistasisLab/tpot)
++ [Awesome-Meta-Learning](https://github.com/sudharsan13296/Awesome-Meta-Learning)
++ [Awesome-ensemble-learning](https://github.com/yzhao062/awesome-ensemble-learning)
++ [awesome-automl-learning](https://github.com/hibayesian/awesome-automl-papers)
++ [awesome-math](https://github.com/rossant/awesome-math)
++ [the-gan-zoo](https://github.com/hindupuravinash/the-gan-zoo)
++ [ChineseNLPCorpus](https://github.com/InsaneLife/ChineseNLPCorpus)
 
 ## Readed
 

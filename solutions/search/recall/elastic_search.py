@@ -10,7 +10,7 @@ es 其他函数整理
 import sys, os
 from datetime import datetime
 from elasticsearch import Elasticsearch
-sys.path.append("../..")
+sys.path.append("../../..")
 from solutions.utils.format.document import get_data, paragraph_chunking
 
 
@@ -55,17 +55,17 @@ def es_delete(es_index_name):
 	# es.delete_by_query(index=app.config['ES_INDEX_PARA'], doc_type=app.config['ES_DOC_TYPE'], body={"query": {"match_all": {}}})
     es.delete_by_query(index=es_index_name, body={"query": {"match_all": {}}})
 
-def es_search(search_query, es_index_name):
+def es_search(search_query, search_size, es_index_name):
     es.indices.refresh(index=es_index_name)
-    res = es.search(index=es_index_name, size=3,body={"query": {"bool": {'should':[{'match':{'text':search_query}}]}}})
+    res = es.search(index=es_index_name, size=search_size, body={"query": {"bool": {'should':[{'match':{'text':search_query}}]}}})
     return res
 
 if __name__ == "__main__":
-    ES_TEST_INDEX = 'test-index'
-    #ES_TEST_INDEX = 'three-body'
-    path = '../../resources/corpus/document/三体.txt'
+    # ES_TEST_INDEX = 'test-index'
+    ES_TEST_INDEX = 'three-body'
+    path = '../../../resources/corpus/document/三体.txt'
     lines = get_data(path)
     paras = paragraph_chunking(lines, 384)
     es_insert(paras, ES_TEST_INDEX)
-    print(es_search('云天明送给程心的星球叫什么名字', ES_TEST_INDEX))
+    print(es_search('云天明送给程心的星球叫什么名字', 3, ES_TEST_INDEX))
     #es_delete(ES_TEST_INDEX)
