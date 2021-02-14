@@ -1,7 +1,10 @@
-CURRENT_DIR=`pwd`
-export DATA_DIR=$CURRENT_DIR/data
 
-nohup python bert_qa.py \
+cd ../../..
+
+CURRENT_DIR=`pwd`
+export DATA_DIR=$CURRENT_DIR/resources/corpus/mrc/cmrc2018
+
+nohup python modules/extractor/interceptor/bert.py \
   --model_type bert \
   --model_name_or_path bert-base-chinese \
   --do_train \
@@ -15,4 +18,4 @@ nohup python bert_qa.py \
   --max_seq_length 384 \
   --doc_stride 128 \
   --overwrite_output_dir \
-  --output_dir output > cmrc_bert_qa.log &
+  --output_dir output > tests/qa/cmrc2018/cmrc_bert_qa.log &

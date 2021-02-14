@@ -26,7 +26,7 @@ from io import open
 from pytorch_transformers.tokenization_bert import BasicTokenizer, whitespace_tokenize
 
 # Required by XLNet evaluation method to compute optimal threshold (see write_predictions_extended() method)
-from solutions.qa.answer_interceptor.utils_squad_evaluate import find_all_best_thresh_v2, make_qid_to_has_ans, get_raw_scores
+from utils_squad_evaluate import find_all_best_thresh_v2, make_qid_to_has_ans, get_raw_scores
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ class SquadExample(object):
                  orig_answer_text=None,
                  start_position=None,
                  end_position=None,
+                 recall_score=None,
                  is_impossible=None):
         self.qas_id = qas_id
         self.question_text = question_text
@@ -51,6 +52,7 @@ class SquadExample(object):
         self.orig_answer_text = orig_answer_text
         self.start_position = start_position
         self.end_position = end_position
+        self.recall_score = recall_score
         self.is_impossible = is_impossible
 
     def __str__(self):
@@ -486,8 +488,7 @@ def _check_is_max_context(doc_spans, cur_span_index, position):
     return cur_span_index == best_span_index
 
 
-RawResult = collections.namedtuple("RawResult",
-                                   ["unique_id", "start_logits", "end_logits"])
+RawResult = collections.namedtuple("RawResult", ["unique_id", "start_logits", "end_logits"])
 
 
 def write_predictions(all_examples, all_features, all_results, n_best_size,
@@ -507,11 +508,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     for result in all_results:
         unique_id_to_result[result.unique_id] = result
 
-    _PrelimPrediction = collections.namedtuple(  # pylint: disable=invalid-name
-        "PrelimPrediction", [
-            "feature_index", "start_index", "end_index", "start_logit",
-            "end_logit"
-        ])
+    _PrelimPrediction = collections.namedtuple("PrelimPrediction", [ "feature_index", "start_index", "end_index", "start_logit", "end_logit" ])
 
     all_predictions = collections.OrderedDict()
     all_nbest_json = collections.OrderedDict()
@@ -552,8 +549,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                         continue
                     if end_index not in feature.token_to_orig_map:
                         continue
-                    if not feature.token_is_max_context.get(
-                            start_index, False):
+                    if not feature.token_is_max_context.get(start_index, False):
                         continue
                     if end_index < start_index:
                         continue
@@ -567,6 +563,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                             end_index=end_index,
                             start_logit=result.start_logits[start_index],
                             end_logit=result.end_logits[end_index]))
+
         if version_2_with_negative:
             prelim_predictions.append(
                 _PrelimPrediction(
@@ -590,38 +587,29 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 break
             feature = features[pred.feature_index]
             if pred.start_index > 0:  # this is a non-null prediction
-                tok_tokens = feature.tokens[pred.start_index:(
-                    pred.end_index + 1)]
+                tok_tokens = feature.tokens[pred.start_index:(pred.end_index + 1)]
                 orig_doc_start = feature.token_to_orig_map[pred.start_index]
                 orig_doc_end = feature.token_to_orig_map[pred.end_index]
-                orig_tokens = example.doc_tokens[orig_doc_start:(
-                    orig_doc_end + 1)]
+                orig_tokens = example.doc_tokens[orig_doc_start:(orig_doc_end + 1)]
                 tok_text = " ".join(tok_tokens)
-
                 # De-tokenize WordPieces that have been split off.
                 tok_text = tok_text.replace(" ##", "")
                 tok_text = tok_text.replace("##", "")
-
                 # Clean whitespace
                 tok_text = tok_text.strip()
                 tok_text = " ".join(tok_text.split())
                 orig_text = " ".join(orig_tokens)
-
-                final_text = get_final_text(tok_text, orig_text, do_lower_case,
-                                            verbose_logging)
+                final_text = get_final_text(tok_text, orig_text, do_lower_case, verbose_logging)
                 if final_text in seen_predictions:
                     continue
-
                 seen_predictions[final_text] = True
+
             else:
                 final_text = ""
                 seen_predictions[final_text] = True
 
-            nbest.append(
-                _NbestPrediction(
-                    text=final_text,
-                    start_logit=pred.start_logit,
-                    end_logit=pred.end_logit))
+            nbest.append(_NbestPrediction(text=final_text, start_logit=pred.start_logit,end_logit=pred.end_logit))
+
         # if we didn't include the empty option in the n-best, include it
         if version_2_with_negative:
             if "" not in seen_predictions:
@@ -642,8 +630,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
         # In very rare edge cases we could have no valid predictions. So we
         # just create a nonce prediction in this case to avoid failure.
         if not nbest:
-            nbest.append(
-                _NbestPrediction(text="empty", start_logit=0.0, end_logit=0.0))
+            nbest.append(_NbestPrediction(text="empty", start_logit=0.0, end_logit=0.0))
 
         assert len(nbest) >= 1
 
@@ -672,13 +659,13 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
             all_predictions[example.qas_id] = nbest_json[0]["text"]
         else:
             # predict "" iff the null score - the score of best non-null > threshold
-            score_diff = score_null - best_non_null_entry.start_logit - (
-                best_non_null_entry.end_logit)
+            score_diff = score_null - best_non_null_entry.start_logit - (best_non_null_entry.end_logit)
             scores_diff_json[example.qas_id] = score_diff
             if score_diff > null_score_diff_threshold:
                 all_predictions[example.qas_id] = ""
             else:
                 all_predictions[example.qas_id] = best_non_null_entry.text
+                # print(best_non_null_entry.text)
         all_nbest_json[example.qas_id] = nbest_json
 
     # with open(output_prediction_file, "w") as writer:
@@ -687,11 +674,11 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     # with open(output_nbest_file, "w") as writer:
     #     writer.write(json.dumps(all_nbest_json, indent=4) + "\n")
 
-    if version_2_with_negative:
-        with open(output_null_log_odds_file, "w") as writer:
-            writer.write(json.dumps(scores_diff_json, indent=4) + "\n")
+    # if version_2_with_negative:
+    #     with open(output_null_log_odds_file, "w") as writer:
+    #         writer.write(json.dumps(scores_diff_json, indent=4) + "\n")
 
-    return all_predictions
+    return all_predictions, all_nbest_json
 
 
 def write_predictions_extended(
@@ -729,29 +716,21 @@ def write_predictions_extended(
 
     for (example_index, example) in enumerate(all_examples):
         features = example_index_to_features[example_index]
-
         prelim_predictions = []
         # keep track of the minimum score of null start+end of position 0
         score_null = 1000000  # large and positive
-
         for (feature_index, feature) in enumerate(features):
             result = unique_id_to_result[feature.unique_id]
-
             cur_null_score = result.cls_logits
-
             # if we could have irrelevant answers, get the min score of irrelevant
             score_null = min(score_null, cur_null_score)
-
             for i in range(start_n_top):
                 for j in range(end_n_top):
                     start_log_prob = result.start_top_log_probs[i]
                     start_index = result.start_top_index[i]
-
                     j_index = i * end_n_top + j
-
                     end_log_prob = result.end_top_log_probs[j_index]
                     end_index = result.end_top_index[j_index]
-
                     # We could hypothetically create invalid predictions, e.g., predict
                     # that the start of the span is in the question. We throw out all
                     # invalid predictions.
@@ -759,7 +738,6 @@ def write_predictions_extended(
                         continue
                     if end_index >= feature.paragraph_len - 1:
                         continue
-
                     if not feature.token_is_max_context.get(
                             start_index, False):
                         continue
@@ -880,9 +858,7 @@ def write_predictions_extended(
     exact_raw, f1_raw = get_raw_scores(orig_data, all_predictions)
     out_eval = {}
 
-    find_all_best_thresh_v2(out_eval, all_predictions, exact_raw, f1_raw,
-                            scores_diff_json, qid_to_has_ans)
-
+    find_all_best_thresh_v2(out_eval, all_predictions, exact_raw, f1_raw, scores_diff_json, qid_to_has_ans)
     return out_eval
 
 

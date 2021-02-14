@@ -15,9 +15,6 @@ from utils_squad import SquadExample
 from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
                               TensorDataset)
 
-import os,sys
-sys.path.append('../../../')
-
 from solutions.qa.orqa.elastic_search import es_search
 
 logger = logging.getLogger(__name__)

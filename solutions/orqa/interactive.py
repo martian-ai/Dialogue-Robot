@@ -38,11 +38,11 @@ def get_search_results(query, search_size, search_engine='offline-es'):
 def build_dataset_example_feature(args, query, tokenizer, search_size):
 
     examples = []
-    scores, contexts = get_search_results(query, search_size, 'offline-es')
+    recall_scores, contexts = get_search_results(query, search_size, 'offline-es')
 
-    for context in contexts:
+    for idx, context in enumerate(contexts):
         example = SquadExample(
-            qas_id=-1,
+            qas_id=idx,
             question_text=query,
             doc_tokens=list(jieba.cut(context)), # Todo 
             orig_answer_text=None,
@@ -68,11 +68,11 @@ def build_dataset_example_feature(args, query, tokenizer, search_size):
     dataset = TensorDataset(all_input_ids, all_input_mask, all_segment_ids,
                                 all_example_index, all_cls_index, all_p_mask)
 
-    return dataset, examples, features
+    return dataset, examples, features, recall_scores
 
 
-def predict(args, query, model, tokenizer, search_size, prefix="", ):
-    dataset, examples, features = build_dataset_example_feature(args, query, tokenizer, search_size)
+def predict(args, query, model, tokenizer, prefix=""):
+    dataset, examples, features, recall_scores = build_dataset_example_feature(args, query, tokenizer, args.search_size)
     args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
     #eval_sampler = SequentialSampler(dataset) if args.local_rank == -1 else DistributedSampler(dataset)
     eval_dataloader = DataLoader(dataset, sampler=None, batch_size=args.eval_batch_size)
@@ -96,10 +96,10 @@ def predict(args, query, model, tokenizer, search_size, prefix="", ):
     # Compute predictions
 
     all_predictions = write_predictions(examples, features, all_results, args.n_best_size,
-                        args.max_answer_length, args.do_lower_case, None, None, None, None,
+                        args.max_answer_length, args.do_lower_case, None, None, None, args.verbose_logging,
                         args.version_2_with_negative, args.null_score_diff_threshold)
     
-    return all_predictions
+    return all_predictions, recall_scores
 
 
 if __name__ == "__main__":
@@ -127,18 +127,19 @@ if __name__ == "__main__":
     parser.add_argument( "--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
     parser.add_argument( "--num_train_epochs", default=3.0, type=float, help="Total number of training epochs to perform.")
     parser.add_argument( "--max_steps", default=-1, type=int, help= "If > 0: set total number of training steps to perform. Override num_train_epochs.")
-    # parser.add_argument( "--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
-    parser.add_argument( "--n_best_size", default=20, type=int, help= "The total number of n-best predictions to generate in the nbest_predictions.json output file.")
+    parser.add_argument( "--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
+    parser.add_argument( "--n_best_size", default=3, type=int, help= "The total number of n-best predictions to generate in the nbest_predictions.json output file.")
     parser.add_argument( "--max_answer_length", default=30, type=int, help= "The maximum length of an answer that can be generated. This is needed because the start " "and end predictions are not conditioned on one another.")
-    # parser.add_argument( "--verbose_logging", action='store_true', help= "If true, all of the warnings related to data processing will be printed. " "A number of warnings are expected for a normal SQuAD evaluation.")
-    # parser.add_argument( '--logging_steps', type=int, default=50, help="Log every X updates steps.")
-    # parser.add_argument( '--save_steps', type=int, default=50, help="Save checkpoint every X updates steps.")
-    # parser.add_argument( "--eval_all_checkpoints", action='store_true', help= "Evaluate all checkpoints starting with the same prefix as model_name ending and ending with step number")
+    parser.add_argument( "--verbose_logging", action='store_true', help= "If true, all of the warnings related to data processing will be printed. " "A number of warnings are expected for a normal SQuAD evaluation.")
+    parser.add_argument( '--logging_steps', type=int, default=50, help="Log every X updates steps.")
+    parser.add_argument( '--save_steps', type=int, default=50, help="Save checkpoint every X updates steps.")
+    parser.add_argument( "--eval_all_checkpoints", action='store_true', help= "Evaluate all checkpoints starting with the same prefix as model_name ending and ending with step number")
     parser.add_argument( "--no_cuda", action='store_true', help="Whether not to use CUDA when available")
     parser.add_argument( '--overwrite_cache', action='store_true', help="Overwrite the cached training and evaluation sets")
     parser.add_argument( '--seed', type=int, default=42, help="random seed for initialization")
     parser.add_argument( "--local_rank", type=int, default=-1, help="local_rank for distributed training on gpus")
     parser.add_argument( "--state_dict", default=None, type=str, required=True, help="model para after pretrained")
+    parser.add_argument( "--search_size", default=3, type=int, required=False, help="search size for recall document size")
 
     args = parser.parse_args()
     args.n_gpu = torch.cuda.device_count()
@@ -154,11 +155,14 @@ if __name__ == "__main__":
     model.to(args.device)
     model.eval()
 
-    search_size = 3
-
     while True:
         query = input("Please Enter:")
         while not query:
             print('Input should not be empty!')
             query = input("Please Enter:")
-        print(predict(args, query, model, tokenizer, search_size))
+        (a,b), c = predict(args, query, model, tokenizer)
+        print(a)
+        print(b[0])
+        print(b[1])
+        print(b[2])
+        print(c)
