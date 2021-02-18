@@ -19,14 +19,12 @@ from __future__ import absolute_import, division, print_function
 
 import argparse
 import logging
-import os
+import os,sys
 import random
 import glob
-
 import numpy as np
 import torch
-from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
-                              TensorDataset)
+from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
 from tensorboardX import SummaryWriter
@@ -36,13 +34,9 @@ from pytorch_transformers import (WEIGHTS_NAME, BertConfig,
                                   XLMTokenizer, XLNetConfig,
                                   XLNetForQuestionAnswering,
                                   XLNetTokenizer)
-
 from pytorch_transformers import AdamW, WarmupLinearSchedule
 
-
-from utils_squad import (read_squad_examples, convert_examples_to_features,
-                         RawResult, write_predictions, write_predictions_extended)
-
+from utils_squad import (read_squad_examples, convert_examples_to_features, RawResult, write_predictions, write_predictions_extended)
 # The follwing import is the official SQuAD evaluation script (2.0).
 # You can remove it from the dependencies if you are using this script outside of the library
 # We've added it here for automated tests (see examples/test_examples.py file)
