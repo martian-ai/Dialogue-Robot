@@ -18,4 +18,5 @@ nohup python modules/extractor/interceptor/bert.py \
   --max_seq_length 384 \
   --doc_stride 128 \
   --overwrite_output_dir \
-  --output_dir output > tests/qa/cmrc2018/cmrc_bert_qa.log &
+  --overwrite_cache \
+  --output_dir tests/mrc/cmrc2018/models > tests/mrc/cmrc2018/cmrc_bert_qa.log &

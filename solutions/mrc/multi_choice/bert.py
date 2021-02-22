@@ -9,8 +9,9 @@ class BERT(nn.Module):
         super(BERT, self).__init__()
         self.bert = bert
         self.dropout = nn.Dropout(opt.dropout)
-        self.dense = nn.Linear(opt.bert_dim, opt.polarities_dim)
-        self.softmax = nn.Softmax(dim=4)
+        self.softmax = nn.Softmax(dim=1)
+        self.dense1 = nn.Linear(opt.bert_dim, 1)
+        #self.dense2 = nn.Linear(opt.bert_dim, 4)
 
     def forward(self, inputs):
         a_indices, a_segments = inputs[0], inputs[1]
@@ -23,16 +24,16 @@ class BERT(nn.Module):
         _, c_pooled_output = self.bert(c_indices, token_type_ids=c_segments)
         _, d_pooled_output = self.bert(d_indices, token_type_ids=d_segments)
 
-        a_pooled_output = self.dropout(a_pooled_output)
-        a_logits = self.dense(a_pooled_output)
+        #print('a', a_pooled_output)
+        #print('b', b_pooled_output)
+        #print('c', c_pooled_output)
+        #print('d', d_pooled_output)
 
-        b_pooled_output = self.dropout(b_pooled_output)
-        b_logits = self.dense(b_pooled_output)
+        a_ = self.dense1(self.dropout(a_pooled_output))
+        b_ = self.dense1(self.dropout(b_pooled_output))
+        c_ = self.dense1(self.dropout(c_pooled_output))
+        d_ = self.dense1(self.dropout(d_pooled_output))
 
-        c_pooled_output = self.dropout(c_pooled_output)
-        c_logits = self.dense(c_pooled_output)
-
-        d_pooled_output = self.dropout(d_pooled_output)
-        d_logits = self.dense(d_pooled_output)
-
-        return self.softmax([a_logits, b_logits, c_logits, d_logits])
+        cat = torch.cat((a_, b_, c_, d_), 1)
+        softmax = self.softmax(cat)
+        return softmax

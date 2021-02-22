@@ -5,6 +5,7 @@ import pickle
 import json
 import numpy as np
 import torch
+from tqdm import tqdm
 from torch.utils.data import Dataset
 from transformers import BertTokenizer
 
@@ -119,17 +120,34 @@ class Tokenizer4Bert:
         if reverse:
             sequence = sequence[::-1]
         return pad_and_truncate(sequence, self.max_seq_len, padding=padding, truncating=truncating)
+# A. A、 A． 等情况删除
+def text_clean(text):
+    text = text.strip('A.')
+    text = text.strip('B.')
+    text = text.strip('C.')
+    text = text.strip('D.')
+    text = text.strip('A、')
+    text = text.strip('B、')
+    text = text.strip('C、')
+    text = text.strip('D、')
+    text = text.strip('A．')
+    text = text.strip('B．')
+    text = text.strip('C．')
+    text = text.strip('D．')
+    text = text.strip()
+    return text
 
 
 class MultiChoiceDataset(Dataset):
     def __init__(self, fname, tokenizer):
-
         with open(fname, "r", encoding='utf-8') as reader:
             examples = json.load(reader)
+        examples = examples
+        print('examples read done')
         all_data = []
-        for entry in examples:
+        for entry in tqdm(examples):
             id = entry['ID']
-            content = entry['Content']
+            content = entry['Content'][:256]
             content_indices = tokenizer.text_to_sequence(content)
             content_len = np.sum(content_indices != 0 )
             questions = entry['Questions']
@@ -138,7 +156,6 @@ class MultiChoiceDataset(Dataset):
                 question_indices = tokenizer.text_to_sequence(question)
                 question_len = np.sum(question_indices != 0 )
                 choice_list = item['Choices']
-                
                 try:
                     answer = item['Answer']
                 except:
@@ -152,82 +169,52 @@ class MultiChoiceDataset(Dataset):
                 elif len(choice_list) == 3:
                     choice_list.append('')
 
-                # A. A、 A． 等情况删除
-                def text_clean(text):
-                    text = text.strip('A.')
-                    text = text.strip('B.')
-                    text = text.strip('C.')
-                    text = text.strip('D.')
-                    text = text.strip('A、')
-                    text = text.strip('B、')
-                    text = text.strip('C、')
-                    text = text.strip('D、')
-                    text = text.strip('A．')
-                    text = text.strip('B．')
-                    text = text.strip('C．')
-                    text = text.strip('D．')
-                    text = text.strip()
-                    return text
-
                 # choice a
                 choice_a = text_clean(choice_list[0])
                 choice_a_indices = tokenizer.text_to_sequence(choice_a)
                 choice_a_len = np.sum(choice_a_indices != 0 )
                 concat_a_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_a + '[SEP]' )
-                concat_segments_a_indices = [0] * (content_len + question_len + 3) + [1] * (choice_a_len + 1)
+                concat_segments_a_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_a_len + 2)
                 concat_segments_a_indices = pad_and_truncate(concat_segments_a_indices, tokenizer.max_seq_len)
-                score_a = 1.0 if q_id == ['A', 'B', 'C', 'D'][0] else 0.0
                 # choice b
                 choice_b = text_clean(choice_list[1])
                 choice_b_indices = tokenizer.text_to_sequence(choice_b)
                 choice_b_len = np.sum(choice_b_indices != 0 )
                 concat_b_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_b + '[SEP]' )
-                concat_segments_b_indices = [0] * (content_len + question_len + 3) + [1] * (choice_b_len + 1)
+                concat_segments_b_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_b_len + 2)
                 concat_segments_b_indices = pad_and_truncate(concat_segments_b_indices, tokenizer.max_seq_len)
-                score_b = 1.0 if q_id == ['A', 'B', 'C', 'D'][1] else 0.0
                 # choice c
                 choice_c = text_clean(choice_list[2])
                 choice_c_indices = tokenizer.text_to_sequence(choice_c)
                 choice_c_len = np.sum(choice_c_indices != 0 )
                 concat_c_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_c + '[SEP]' )
-                concat_segments_c_indices = [0] * (content_len + question_len + 3) + [1] * (choice_c_len + 1)
+                concat_segments_c_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_c_len + 2)
                 concat_segments_c_indices = pad_and_truncate(concat_segments_c_indices, tokenizer.max_seq_len)
-                score_c = 1.0 if q_id == ['A', 'B', 'C', 'D'][2] else 0.0
                 # choice d
                 choice_d = text_clean(choice_list[3])
                 choice_d_indices = tokenizer.text_to_sequence(choice_d)
                 choice_d_len = np.sum(choice_d_indices != 0 )
                 concat_d_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_d + '[SEP]' )
-                concat_segments_d_indices = [0] * (content_len + question_len + 3) + [1] * (choice_d_len + 1)
+                concat_segments_d_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_d_len + 2)
                 concat_segments_d_indices = pad_and_truncate(concat_segments_d_indices, tokenizer.max_seq_len)
-                score_d = 1.0 if q_id == ['A', 'B', 'C', 'D'][3] else 0.0
-
                 if answer == 'A':
-                    polarity = [1.0, 0.0, 0.0, 0.0]
+                    polarity = 0
                 elif answer == 'B':
-                    polarity = [0.0, 1.0, 0.0, 0.0]
+                    polarity = 1
                 elif answer == 'C':
-                    polarity = [0.0, 0.0, 1.0, 0.0]
+                    polarity = 2
                 elif answer == 'D':
-                    polarity = [0.0, 0.0, 0.0, 1.0]
+                    polarity = 3
 
                 data = {
                     'concat_a_indices':concat_a_indices,
                     'concat_segments_a_indices':concat_segments_a_indices,
-                    'score_a':score_a,
-
                     'concat_b_indices':concat_b_indices,
                     'concat_segments_b_indices':concat_segments_b_indices,
-                    'score_b':score_b,
-
                     'concat_c_indices':concat_c_indices,
                     'concat_segments_c_indices':concat_segments_c_indices,
-                    'score_c':score_c,
-
                     'concat_d_indices':concat_d_indices,
                     'concat_segments_d_indices':concat_segments_d_indices,
-                    'score_d':score_d,
-
                     'polarity' : polarity
                 }
                 all_data.append(data)

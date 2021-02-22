@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# file: train.py
-# author: songyouwei <youwei0314@gmail.com>
-# Copyright (C) 2018. All Rights Reserved.
 
 import logging
 import argparse
@@ -34,7 +31,7 @@ class Instructor:
         if 'bert' in opt.model_name:
             tokenizer = Tokenizer4Bert(opt.max_seq_len, opt.pretrained_bert_name)
             bert = BertModel.from_pretrained(opt.pretrained_bert_name)
-            self.model = opt.model_class(bert, opt).to(opt.device)
+            self.model = nn.DataParallel(opt.model_class(bert, opt)).to(opt.device)
         else:
             tokenizer = build_tokenizer(
                 fnames=[opt.dataset_file['train'], opt.dataset_file['test']],
@@ -45,15 +42,21 @@ class Instructor:
                 embed_dim=opt.embed_dim,
                 dat_fname='{0}_{1}_embedding_matrix.dat'.format(str(opt.embed_dim), opt.dataset))
             self.model = opt.model_class(embedding_matrix, opt).to(opt.device)
+        print('pretrainn model load done')
 
         self.trainset = MultiChoiceDataset(opt.dataset_file['train'], tokenizer)
-        self.testset = MultiChoiceDataset(opt.dataset_file['test'], tokenizer)
-        self.valset = MultiChoiceDataset(opt.dataset_file['val'], tokenizer)
-        #assert 0 <= opt.valset_ratio < 1
+        print('trainset build done') 
+        assert 0 <= opt.valset_ratio < 1
+        
+        self.testset = self.trainset
+        self.valset = self.testset
+
         #if opt.valset_ratio > 0:
         #    valset_len = int(len(self.trainset) * opt.valset_ratio)
         #    self.trainset, self.valset = random_split(self.trainset, (len(self.trainset)-valset_len, valset_len))
+        #    self.testset = self.valset
         #else:
+        #    self.testset = self.trainset
         #    self.valset = self.testset
 
         if opt.device.type == 'cuda':
@@ -104,7 +107,9 @@ class Instructor:
                 inputs = [batch[col].to(self.opt.device) for col in self.opt.inputs_cols]
                 outputs = self.model(inputs)
                 targets = batch['polarity'].to(self.opt.device)
-
+                #print('targets', targets)
+                #print('outputs', outputs)
+                #print('argmax', torch.argmax(outputs, -1))
                 loss = criterion(outputs, targets)
                 loss.backward()
                 optimizer.step()
@@ -117,8 +122,8 @@ class Instructor:
                     train_loss = loss_total / n_total
                     logger.info('loss: {:.4f}, acc: {:.4f}'.format(train_loss, train_acc))
 
-            val_acc, val_f1 = self._evaluate_acc_f1(val_data_loader)
-            logger.info('> val_acc: {:.4f}, val_f1: {:.4f}'.format(val_acc, val_f1))
+            val_acc  = self._evaluate_acc(val_data_loader)
+            logger.info('> val_acc: {:.4f}'.format(val_acc))
             if val_acc > max_val_acc:
                 max_val_acc = val_acc
                 max_val_epoch = i_epoch
@@ -127,15 +132,13 @@ class Instructor:
                 path = 'state_dict/{0}_{1}_val_acc_{2}'.format(self.opt.model_name, self.opt.dataset, round(val_acc, 4))
                 torch.save(self.model.state_dict(), path)
                 logger.info('>> saved: {}'.format(path))
-            if val_f1 > max_val_f1:
-                max_val_f1 = val_f1
             if i_epoch - max_val_epoch >= self.opt.patience:
                 print('>> early stop.')
                 break
 
         return path
 
-    def _evaluate_acc_f1(self, data_loader):
+    def _evaluate_acc(self, data_loader):
         n_correct, n_total = 0, 0
         t_targets_all, t_outputs_all = None, None
         # switch model to evaluation mode
@@ -155,9 +158,7 @@ class Instructor:
                     t_outputs_all = torch.cat((t_outputs_all, t_outputs), dim=0)
 
         acc = n_correct / n_total
-        f1 = metrics.f1_score(t_targets_all.cpu(), torch.argmax(t_outputs_all, -1).cpu(), labels=[0, 1, 2], average='macro') # TODO 1. macro 2.label = [0,1,2] 写死了，其他情况可能出问题 
-        print(metrics.classification_report(t_targets_all.cpu(), torch.argmax(t_outputs_all, -1).cpu(), labels=[0, 1, 2], target_names=['all', 'price', 'service'])) 
-        return acc, f1
+        return acc
 
     def run(self):
         # Loss and Optimizer
@@ -168,12 +169,25 @@ class Instructor:
         train_data_loader = DataLoader(dataset=self.trainset, batch_size=self.opt.batch_size, shuffle=True)
         test_data_loader = DataLoader(dataset=self.testset, batch_size=self.opt.batch_size, shuffle=False)
         val_data_loader = DataLoader(dataset=self.valset, batch_size=self.opt.batch_size, shuffle=False)
+        print("*"*100)
+        print('data load done')
+        print("*"*100)
 
-        self._reset_params()
+        # TODO
+        #self._reset_params()
+        print("*"*100)
+        print('train')
+        print("*"*100)
         best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
+        print("*"*100)
+        print('best_model_path', best_model_path)
+        print("*"*100)
         self.model.load_state_dict(torch.load(best_model_path))
-        test_acc, test_f1 = self._evaluate_acc_f1(test_data_loader)
-        logger.info('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))
+        print("*"*100)
+        print('evaluate')
+        print("*"*100)
+        test_acc = self._evaluate_acc(test_data_loader)
+        logger.info('>> test_acc: {:.4f}'.format(test_acc))
 
 
 def main():
@@ -183,18 +197,18 @@ def main():
     parser.add_argument('--dataset', default='haihua', type=str, help='haihua')
     parser.add_argument('--optimizer', default='adam', type=str)
     parser.add_argument('--initializer', default='xavier_uniform_', type=str)
-    parser.add_argument('--lr', default=5e-6, type=float, help='try 5e-5, 2e-5 for BERT, 1e-3 for others')
+    parser.add_argument('--lr', default=5e-5, type=float, help='try 5e-5, 2e-5 for BERT, 1e-3 for others')
     parser.add_argument('--dropout', default=0.1, type=float)
     parser.add_argument('--l2reg', default=0.01, type=float)
     parser.add_argument('--num_epoch', default=100, type=int, help='try larger number for non-BERT models')
-    parser.add_argument('--batch_size', default=256, type=int, help='try 16, 32, 64 for BERT models')
-    parser.add_argument('--log_step', default=10, type=int)
+    parser.add_argument('--batch_size', default=16, type=int, help='try 16, 32, 64 for BERT models')
+    parser.add_argument('--log_step', default=200, type=int)
     parser.add_argument('--embed_dim', default=300, type=int)
     parser.add_argument('--hidden_dim', default=300, type=int)
     parser.add_argument('--bert_dim', default=768, type=int)
     parser.add_argument('--pretrained_bert_name', default='bert-base-chinese', type=str) # 其他embedding 
     parser.add_argument('--max_seq_len', default=512, type=int)
-    parser.add_argument('--polarities_dim', default=3, type=int)
+    parser.add_argument('--polarities_dim', default=4, type=int)
     parser.add_argument('--hops', default=3, type=int)
     parser.add_argument('--patience', default=20, type=int)
     parser.add_argument('--device', default=None, type=str, help='e.g. cuda:0')
@@ -257,4 +271,5 @@ def main():
 
 if __name__ == '__main__':
     print(torch.cuda.is_available())
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     main()
