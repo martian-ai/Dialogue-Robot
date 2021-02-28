@@ -4,7 +4,7 @@ cd ../../..
 CURRENT_DIR=`pwd`
 export DATA_DIR=$CURRENT_DIR/resources/corpus/mrc/cmrc2018
 
-nohup python modules/extractor/interceptor/bert.py \
+nohup python solutions/mrc/singel_span/bert.py \
   --model_type bert \
   --model_name_or_path bert-base-chinese \
   --do_train \
