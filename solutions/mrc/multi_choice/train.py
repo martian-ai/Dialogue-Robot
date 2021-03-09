@@ -51,13 +51,13 @@ class Instructor:
         self.testset = self.trainset
         self.valset = self.testset
 
-        #if opt.valset_ratio > 0:
-        #    valset_len = int(len(self.trainset) * opt.valset_ratio)
-        #    self.trainset, self.valset = random_split(self.trainset, (len(self.trainset)-valset_len, valset_len))
-        #    self.testset = self.valset
-        #else:
-        #    self.testset = self.trainset
-        #    self.valset = self.testset
+        if opt.valset_ratio > 0:
+            valset_len = int(len(self.trainset) * opt.valset_ratio)
+            self.trainset, self.valset = random_split(self.trainset, (len(self.trainset)-valset_len, valset_len))
+            self.testset = self.valset
+        else:
+            self.testset = self.trainset
+            self.valset = self.testset
 
         if opt.device.type == 'cuda':
             logger.info('cuda memory allocated: {}'.format(torch.cuda.memory_allocated(device=opt.device.index)))
@@ -95,7 +95,6 @@ class Instructor:
         path = None
         for i_epoch in range(self.opt.num_epoch):
             logger.info('>' * 100)
-            logger.info('epoch: {}'.format(i_epoch))
             n_correct, n_total, loss_total = 0, 0, 0
             # switch model to training mode
             self.model.train()
@@ -105,11 +104,8 @@ class Instructor:
                 optimizer.zero_grad()
 
                 inputs = [batch[col].to(self.opt.device) for col in self.opt.inputs_cols]
-                outputs = self.model(inputs)
+                cats, outputs = self.model(inputs)
                 targets = batch['polarity'].to(self.opt.device)
-                #print('targets', targets)
-                #print('outputs', outputs)
-                #print('argmax', torch.argmax(outputs, -1))
                 loss = criterion(outputs, targets)
                 loss.backward()
                 optimizer.step()
@@ -121,6 +117,11 @@ class Instructor:
                     train_acc = n_correct / n_total
                     train_loss = loss_total / n_total
                     logger.info('loss: {:.4f}, acc: {:.4f}'.format(train_loss, train_acc))
+
+                    print('targets', targets)
+                    print('argmax', torch.argmax(outputs, -1))
+                    print('outputs', outputs)
+                    print('cats', cats)
 
             val_acc  = self._evaluate_acc(val_data_loader)
             logger.info('> val_acc: {:.4f}'.format(val_acc))
@@ -178,6 +179,7 @@ class Instructor:
         print("*"*100)
         print('train')
         print("*"*100)
+        print("*"*100)
         best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
         print("*"*100)
         print('best_model_path', best_model_path)
@@ -201,19 +203,20 @@ def main():
     parser.add_argument('--dropout', default=0.1, type=float)
     parser.add_argument('--l2reg', default=0.01, type=float)
     parser.add_argument('--num_epoch', default=100, type=int, help='try larger number for non-BERT models')
-    parser.add_argument('--batch_size', default=16, type=int, help='try 16, 32, 64 for BERT models')
+    parser.add_argument('--batch_size', default=22, type=int, help='try 16, 32, 64 for BERT models')
     parser.add_argument('--log_step', default=200, type=int)
     parser.add_argument('--embed_dim', default=300, type=int)
     parser.add_argument('--hidden_dim', default=300, type=int)
     parser.add_argument('--bert_dim', default=768, type=int)
     parser.add_argument('--pretrained_bert_name', default='bert-base-chinese', type=str) # 其他embedding 
+    #parser.add_argument('--pretrained_bert_name', default='roberta-base', type=str) # 其他embedding 
     parser.add_argument('--max_seq_len', default=512, type=int)
     parser.add_argument('--polarities_dim', default=4, type=int)
     parser.add_argument('--hops', default=3, type=int)
     parser.add_argument('--patience', default=20, type=int)
     parser.add_argument('--device', default=None, type=str, help='e.g. cuda:0')
     parser.add_argument('--seed', default=1234, type=int, help='set seed for reproducibility')
-    parser.add_argument('--valset_ratio', default=0, type=float, help='set ratio between 0 and 1 for validation support')
+    parser.add_argument('--valset_ratio', default=0.1, type=float, help='set ratio between 0 and 1 for validation support')
     # The following parameters are only valid for the lcf-bert model
     parser.add_argument('--local_context_focus', default='cdm', type=str, help='local context focus mode, cdw or cdm')
     parser.add_argument('--SRD', default=3, type=int, help='semantic-relative-distance, see the paper of LCF-BERT model')
@@ -262,7 +265,7 @@ def main():
     opt.optimizer = optimizers[opt.optimizer]
     opt.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') if opt.device is None else torch.device(opt.device)
 
-    log_file = '{}-{}-{}.log'.format(opt.model_name, opt.dataset, strftime("%y%m%d-%H%M", localtime()))
+    log_file = 'logs/{}-{}-{}.log'.format(opt.model_name, opt.dataset, strftime("%y%m%d-%H%M", localtime()))
     logger.addHandler(logging.FileHandler(log_file))
 
     ins = Instructor(opt)
@@ -271,5 +274,5 @@ def main():
 
 if __name__ == '__main__':
     print(torch.cuda.is_available())
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1,2,3"
     main()
