@@ -1,2 +1,0 @@
-Seq2seq
-memory

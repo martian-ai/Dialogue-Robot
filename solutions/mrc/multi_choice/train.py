@@ -148,7 +148,7 @@ class Instructor:
             for i_batch, t_batch in enumerate(data_loader):
                 t_inputs = [t_batch[col].to(self.opt.device) for col in self.opt.inputs_cols]
                 t_targets = t_batch['polarity'].to(self.opt.device) # TODO
-                t_outputs = self.model(t_inputs)
+                t_cats, t_outputs = self.model(t_inputs)
                 n_correct += (torch.argmax(t_outputs, -1) == t_targets).sum().item()
                 n_total += len(t_outputs)
                 if t_targets_all is None:

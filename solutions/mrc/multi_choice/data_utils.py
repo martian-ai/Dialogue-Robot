@@ -122,6 +122,8 @@ class Tokenizer4Bert:
         if reverse:
             sequence = sequence[::-1]
         return pad_and_truncate(sequence, self.max_seq_len, padding=padding, truncating=truncating)
+
+
 # A. A、 A． 等情况删除
 def text_clean(text):
     text = text.strip('A.')
@@ -152,16 +154,17 @@ class MultiChoiceDataset(Dataset):
             #print(">"*200)
             id = entry['ID']
             content = entry['Content']
-            #print('content', content)
-            #print('length of content', len(content))
+            print('content', content)
+            print('length of content', len(content))
             content_indices = tokenizer.text_to_sequence(content)
             content_len = np.sum(content_indices != 0 )
             questions = entry['Questions']
             for item in questions:
                 question = item['Question']
-                #print('questions', question)
                 question_indices = tokenizer.text_to_sequence(question)
                 question_len = np.sum(question_indices != 0 )
+                print('question', question)
+                print('question length', question_len)
                 choice_list = item['Choices']
                 try:
                     answer = item['Answer']
@@ -175,53 +178,65 @@ class MultiChoiceDataset(Dataset):
                     choice_list.append('')
                 elif len(choice_list) == 3:
                     choice_list.append('')
-                #print('choice list', choice_list)
-                #print('answer', answer)
 
                 # choice a
                 choice_a = text_clean(choice_list[0])
-                #print('choice a', choice_a)
                 choice_a_indices = tokenizer.text_to_sequence(choice_a)
                 choice_a_len = np.sum(choice_a_indices != 0 )
-                #print('choice a length', choice_a_len)
                 #concat_a_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_a + '[SEP]' )
                 #concat_segments_a_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_a_len + 2)
-                concat_a_indices = tokenizer.text_to_sequence('[CLS] ' + question  + choice_a + '[SEP]' + content + '[SEP]' )
+                concat_a_indices = tokenizer.text_to_sequence('[CLS] ' + choice_a + question + '[SEP]' + content + '[SEP]' )
                 concat_segments_a_indices = [0] * ( question_len + choice_a_len + 2) + [1] * (content_len + 1) 
                 concat_segments_a_indices = pad_and_truncate(concat_segments_a_indices, tokenizer.max_seq_len)
+                print('choice a string', choice_a)
+                print('choice a length', choice_a_len)
+                print('choice a indices', concat_a_indices)
+                print('choice a segment indices', concat_segments_a_indices)
+
                 # choice b
                 choice_b = text_clean(choice_list[1])
-                #print('choice b', choice_b)
                 choice_b_indices = tokenizer.text_to_sequence(choice_b)
                 choice_b_len = np.sum(choice_b_indices != 0 )
-                #print('choice b length', choice_b_len)
                 #concat_b_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_b + '[SEP]' )
                 #concat_segments_b_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_b_len + 2)
-                concat_b_indices = tokenizer.text_to_sequence('[CLS] ' + question + choice_b + '[SEP]' + content + '[SEP]' )
+                concat_b_indices = tokenizer.text_to_sequence('[CLS] ' + choice_b + question + '[SEP]' + content + '[SEP]' )
                 concat_segments_b_indices = [0] * ( question_len + choice_b_len + 2) + [1] * (content_len + 1) 
                 concat_segments_b_indices = pad_and_truncate(concat_segments_b_indices, tokenizer.max_seq_len)
+                print('choice b string', choice_b)
+                print('choice b length', choice_b_len)
+                print('choice b indices', choice_b_indices)
+                print('choice b segment indices', concat_segments_b_indices)
+
                 # choice c
                 choice_c = text_clean(choice_list[2])
-                #print('choice c', choice_c)
                 choice_c_indices = tokenizer.text_to_sequence(choice_c)
                 choice_c_len = np.sum(choice_c_indices != 0 )
-                #print('choice c length', choice_c_len)
                 #concat_c_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_c + '[SEP]' )
                 #concat_segments_c_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_c_len + 2)
-                concat_c_indices = tokenizer.text_to_sequence('[CLS] ' + question + choice_c + '[SEP]' + content + '[SEP]' )
+                concat_c_indices = tokenizer.text_to_sequence('[CLS] ' + choice_c + question + '[SEP]' + content + '[SEP]' )
                 concat_segments_c_indices = [0] * ( question_len + choice_c_len + 2) + [1] * (content_len + 1) 
                 concat_segments_c_indices = pad_and_truncate(concat_segments_c_indices, tokenizer.max_seq_len)
+                print('choice c string', choice_c)
+                print('choice c length', choice_c_len)
+                print('choice c indices', choice_c_indices)
+                print('choice c segment indices', concat_segments_c_indices)
+
                 # choice d
                 choice_d = text_clean(choice_list[3])
-                #print('choice d', choice_d)
                 choice_d_indices = tokenizer.text_to_sequence(choice_d)
                 choice_d_len = np.sum(choice_d_indices != 0 )
-                #print('choice d length', choice_d_len)
                 #concat_d_indices = tokenizer.text_to_sequence('[CLS] ' + content + ' [SEP] ' + question + '[SEP]' + choice_d + '[SEP]' )
                 #concat_segments_d_indices = [0] * (content_len + 2) + [1] * ( question_len + choice_d_len + 2)
-                concat_d_indices = tokenizer.text_to_sequence('[CLS] ' + question + choice_d + '[SEP]' + content + '[SEP]' )
+                concat_d_indices = tokenizer.text_to_sequence('[CLS] ' +  choice_d + question +  '[SEP]' + content + '[SEP]' )
                 concat_segments_d_indices = [0] * ( question_len + choice_d_len + 2) + [1] * (content_len + 1) 
                 concat_segments_d_indices = pad_and_truncate(concat_segments_d_indices, tokenizer.max_seq_len)
+
+                print('choice d string', choice_d)
+                print('choice d length', choice_d_len)
+                print('choice d indices', choice_d_indices)
+                print('choice d segment indices', concat_segments_d_indices)
+
+
                 if answer == 'A':
                     polarity = 0
                 elif answer == 'B':

@@ -1,1 +1,0 @@
-https://www.kesci.com/home/competition/5d142d8cbb14e6002c04e14a
