@@ -204,7 +204,7 @@ class MultiChoiceDataset(Dataset):
                 concat_segments_b_indices = pad_and_truncate(concat_segments_b_indices, tokenizer.max_seq_len)
                 print('choice b string', choice_b)
                 print('choice b length', choice_b_len)
-                print('choice b indices', choice_b_indices)
+                print('choice b indices', concat_b_indices)
                 print('choice b segment indices', concat_segments_b_indices)
 
                 # choice c
@@ -218,7 +218,7 @@ class MultiChoiceDataset(Dataset):
                 concat_segments_c_indices = pad_and_truncate(concat_segments_c_indices, tokenizer.max_seq_len)
                 print('choice c string', choice_c)
                 print('choice c length', choice_c_len)
-                print('choice c indices', choice_c_indices)
+                print('choice c indices', concat_c_indices)
                 print('choice c segment indices', concat_segments_c_indices)
 
                 # choice d
@@ -233,7 +233,7 @@ class MultiChoiceDataset(Dataset):
 
                 print('choice d string', choice_d)
                 print('choice d length', choice_d_len)
-                print('choice d indices', choice_d_indices)
+                print('choice d indices', concat_d_indices)
                 print('choice d segment indices', concat_segments_d_indices)
 
 
