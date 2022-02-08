@@ -1,0 +1,91 @@
+# Summary of Machine Reading Comprehension Algorithms
+
+- 背景
+  - 核心
+  - 形式
+    - 文档形式
+    - 问题形式
+  - 阅读理解 VS 传统问答
+    - 传统
+      - 各种知识资源
+      - 问题类型有限
+      - 答案类型有限
+      - 侧重对问题语义的准确表达
+    - 阅读理解
+          + 答案来源-固定文档  
+          + 问题形式多样
+          + 答案类型多样
+          + 根据上下文进行推理
+  - 挑战
+    - 需要多种形式的推理能力
+    - 需要篇章知识
+    - 需要常识知识
+    - 需要综合运用
+  - 典型任务
+    - 给定指定文档
+    - 问题形式
+      - 选择题
+      - 填空题
+      - 完形填空
+    - 典型数据集
+- 传统方法
+  - 两步架构
+    - 片段检索
+      - P(片段|问题,文档)
+    - 答案生成
+      - P(答案|问题,片段)
+    - 最终
+      - P(答案|问题,片段) * P(片段|问题,文档)
+    - 特征
+      - 挖掘隐形文本蕴含的结构,如,词级别的对应特征
+        - Sachan, ACL 2015
+  - 问题
+    - 与问答任务的困难类似
+      - 词汇,表达,常识(不理解)
+    - 对篇章理解的建模能力有限
+    - 对深层次的推理需求无能为力
+      - bAbi 中有20中任务类型
+    - 外部工具,资源带来的错误传递与积累
+- 深度学习方法
+  - LSTM
+    - Deep LSTM Reader
+      - 对距离较远的关键词缺乏足够的关联建模
+  - Attention Mechanism
+    - Attentive Reader
+      - Bi-LSTM + Attention
+      - 找到最有支持力度的句子
+    - Impatient Reader
+      - LSTM + Attentions
+      - 在处理问题的单词时, 通过注意力机制令模型能够重新阅读理解文档句子
+      - 逐步处理问题,反复阅读句子,产生更好的文档表示
+  - Memory Network
+    - I(Input feature map):将输入转化为**内部特征**表示
+    - G(Generalization):根据输入**更新**当前Memory
+    - O(Oputput feature map):根据**输入**和**当前Memory状态**，生成**输出向量**
+    - R(Response):根据**输出向量**，产生答案
+    - 改进
+      - 自适应的记忆单元
+      - 记忆单元使用N-Gram
+      - 函数匹配非线性化
+      - 每一步都需要完全监督, 如何处理多步推理
+    - End2End MN
+      - 记忆单元/bAbi
+  - Attention over Attention
+  - Match LSTM
+  - Bi-directional Attention Flow(BiDAF)
+  - Doc Retriever-Doc Reader
+    - Open-domain QA
+      - SQuAD, TREC, Web Question, WikiMovies
+      - Mnemonic Reader
+      - R-Net
+      - Self-Matching Network   
+  - Hierarchical CNN
+  - Pointer Network
+- 比较
+  - 基于传统特征
+  - 难以适应大规模,开放域的问题
+  - 针对不同类型的阅读理解任务需要重新设计
+  - 基于深度学习
+    - 受益于词向量的分布式表示和各种结构
+    - 专注于模型结构
+    - 不同形式的推理建模还有很大的提升空间

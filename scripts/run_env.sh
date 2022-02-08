@@ -1,0 +1,1 @@
+source C:/ProgramData/Anaconda3/Scripts/activate base
