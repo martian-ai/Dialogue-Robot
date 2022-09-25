@@ -1,3 +1,7 @@
+projects/
+topic-dialog-summ-main/
+static_dict/
+state_dict/
 lib/
 bin/
 include/
@@ -17,6 +21,7 @@ View-*
 SimHei.ttf
 dataset/
 projects/
+logs/*
 
 =======
 # Byte-compiled / optimized / DLL files
