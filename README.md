@@ -61,11 +61,11 @@
 ## 版本管理
 
 + v 0.1.0
-  + application
-    + doc_qa_mining
-      + 基础问答对挖掘能力开发
-      + 使用 textrank 选择重要句子作为摘要 Summary， 遍历重要句子作为答案 Answer，通过重要句子 和 摘要 来生生成问题 Question ，挖掘结果为 {Sumary， Question， Answer}
-+ v 0.2.0
+  + application/doc_qa_mining
+
+    + 基础问答对挖掘能力开发
+    + 使用 textrank 选择重要句子作为摘要 Summary， 遍历重要句子作为答案 Answer，通过重要句子 和 摘要 来生生成问题 Question ，挖掘结果为 {Sumary， Question， Answer}
++ v 0.1.1
 
 ## 数据资源
 
