@@ -1,4 +1,4 @@
-with open('../../resources/corpus/solutions/document/三体.txt', mode='r', encoding='utf-8') as f:
+with open('../../resources/corpus/solutions/mining_qa/document/三体.txt', mode='r', encoding='utf-8') as f:
     lines = f.readlines()[150:180]
 
 print(lines)
