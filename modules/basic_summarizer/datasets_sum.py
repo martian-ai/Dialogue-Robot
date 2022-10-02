@@ -1,8 +1,9 @@
-import pandas as pd
+
 import datasets
-from datasets import load_dataset, Dataset
+import pandas as pd
+from datasets import Dataset, load_dataset
 from transformers import BertTokenizer
- 
+
 max_input_length = 512
 max_target_length = 128
  
@@ -50,6 +51,7 @@ print(tokenized_datasets['train'][:10])
 
 # https://rmh.pdnews.cn/Pc/ArtInfoApi/article?id=29971349
 from transformers import EncoderDecoderModel
+
 bert2bert = EncoderDecoderModel.from_encoder_decoder_pretrained("bert-base-chinese", "bert-base-chinese")
 
 from transformers import BertTokenizerFast
@@ -65,7 +67,7 @@ bert2bert.config.eos_token_id = tokenizer.eos_token_id
 bert2bert.config.pad_token_id = tokenizer.pad_token_id
 
 
-from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments
 
 training_args = Seq2SeqTrainingArguments(
   output_dir="./",
