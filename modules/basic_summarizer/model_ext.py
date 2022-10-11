@@ -3,6 +3,15 @@ import os
 import torch
 from torch.autograd import Variable
 
+import torch
+import numpy as np
+import torch.nn as nn
+import torch.nn.functional as F
+# from .Attention import Attention
+from torch.autograd import Variable
+from modules.alpha_nn.modeling_base import AttentionSelf as Attention
+
+
 
 class BasicModule(torch.nn.Module):
 
@@ -49,15 +58,6 @@ class BasicModule(torch.nn.Module):
             return self.cuda()
         else:
             return self
-
-
-from .BasicModule import BasicModule
-import torch
-import numpy as np
-import torch.nn as nn
-import torch.nn.functional as F
-from .Attention import Attention
-from torch.autograd import Variable
 
 class AttnRNN(BasicModule):
     def __init__(self, args, embed=None):
@@ -168,12 +168,6 @@ class AttnRNN(BasicModule):
                 probs.append(prob)
         return torch.cat(probs).squeeze()
 
-from .BasicModule import BasicModule
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
-
 class CNN_RNN(BasicModule):
     def __init__(self, args, embed=None):
         super(CNN_RNN,self).__init__(args)
@@ -273,12 +267,6 @@ class CNN_RNN(BasicModule):
                 s = s + torch.mm(prob,h)
                 probs.append(prob)
         return torch.cat(probs).squeeze()
-
-from .BasicModule import BasicModule
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
 
 class RNN_RNN(BasicModule):
     def __init__(self, args, embed=None):
