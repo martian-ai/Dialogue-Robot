@@ -8,6 +8,36 @@ import time
 from tqdm import tqdm
 from sklearn.metrics import roc_auc_score
 
+def argmax(vec):
+    """ return the argmax as a python int
+
+    Args:
+        vec (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    _, idx = torch.max(vec, 1)
+    return idx.item()
+
+
+def log_sum_exp(vec):
+    """ Compute log sum exp in a numerically stable way for the forward algorithm
+
+    Args:
+        vec (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    max_score = vec[0, argmax(vec)]
+    max_score_broadcast = max_score.view(1, 0).expand(1, vec.size()[1])
+    return max_score + torch.log(
+        torch.sum(torch.exp(vec - max_score_broadcast)))
+
+
+
 def generate_sent_masks(enc_hiddens, source_lengths):
     """ Generate sentence masks for encoder hidden states.
     @param enc_hiddens (Tensor): encodings of shape (b, src_len, h), where b = batch size,

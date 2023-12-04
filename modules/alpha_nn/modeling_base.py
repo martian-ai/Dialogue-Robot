@@ -21,35 +21,6 @@ START_TAG = "<START>"
 STOP_TAG = "<STOP>"
 
 
-def argmax(vec):
-    """ return the argmax as a python int
-
-    Args:
-        vec (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    _, idx = torch.max(vec, 1)
-    return idx.item()
-
-
-def log_sum_exp(vec):
-    """ Compute log sum exp in a numerically stable way for the forward algorithm
-
-    Args:
-        vec (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    max_score = vec[0, argmax(vec)]
-    max_score_broadcast = max_score.view(1, 0).expand(1, vec.size()[1])
-    return max_score + torch.log(
-        torch.sum(torch.exp(vec - max_score_broadcast)))
-
-
 class MLP(nn.Module):
     """_summary_
 
@@ -62,6 +33,63 @@ class MLP(nn.Module):
 
     def forward(self):
         pass
+
+
+import torch
+from torch.nn import Linear, ReLU, Sequential, Dropout, Softmax
+import torch.nn.functional as F
+
+class MLP(torch.nn.Module):
+    """
+    
+    默认三层隐藏层，分别有128个 64个 16个神经元
+
+    论文
+
+    Args:
+        torch (_type_): _description_
+    """
+    def __init__(self, input_n, output_n, num_layer=3, layer_list=[128, 64, 16], dropout=0.5):
+
+        """
+        :param input_n: int 输入神经元个数
+        :param output_n: int 输出神经元个数
+        :param num_layer: int 隐藏层层数
+        :param layer_list: list(int) 每层隐藏层神经元个数
+        :param dropout: float 训练完丢掉多少
+        """
+        super(MLP, self).__init__()
+        self.input_n = input_n
+        self.output_n = output_n
+        self.num_layer = num_layer
+        self.layer_list = layer_list
+
+        # 输入层
+        self.input_layer = Sequential(
+            Linear(input_n, layer_list[0], bias=False),
+            ReLU()
+        )
+
+        # 隐藏层
+        self.hidden_layer = Sequential()
+
+        for index in range(num_layer-1):
+            self.hidden_layer.extend([Linear(layer_list[index], layer_list[index+1], bias=False), ReLU()])
+
+        self.dropout = Dropout(dropout)
+
+        # 输出层
+        self.output_layer = Sequential(
+            Linear(layer_list[-1], output_n, bias=False),
+            Softmax(dim=1),
+        )
+
+    def forward(self, x):
+        input = self.input_layer(x)
+        hidden = self.hidden_layer(input)
+        hidden = self.dropout(hidden)
+        output = self.output_layer(hidden)
+        return output
 
 
 class DynamicLSTM(nn.Module):
