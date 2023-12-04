@@ -1,6 +1,5 @@
 import sys
-sys.path.append("../..")
-
+sys.path.append(".")
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -11,6 +10,7 @@ import pandas as pd
 
 
 from modules.alpha_nn.modeling_bert import BertClassifier
+from modules.alpha_nn.modeling_base import MLP
 from modules.dataset.clf_toutiao import Dataset_Toutiao
 
 # 训练模型
@@ -31,10 +31,7 @@ def train(model, train_data, val_data, learning_rate, epochs, batch_size, labels
         criterion = criterion.cuda()
     # 开始进入训练循环
     for epoch_num in range(epochs):
-        # 定义两个变量，用于存储训练集的准确率和损失
-        total_acc_train = 0
-        total_loss_train = 0
-        # 进度条函数tqdm
+        total_acc_train, total_loss_train = 0, 0
         for train_input, train_label in tqdm(train_dataloader):
             train_label = train_label.to(device)
             mask = train_input['attention_mask'].to(device)
@@ -76,8 +73,8 @@ def train(model, train_data, val_data, learning_rate, epochs, batch_size, labels
               | Val Accuracy: {total_acc_val / len(val_data): .3f}''')
  
 # 评估模型
-def evaluate(model, test_data):
-    test = Dataset_Toutiao(test_data)
+def evaluate(model, test_data, labels, tokenizer):
+    test = Dataset_Toutiao(test_data, labels, tokenizer)
     test_dataloader = torch.utils.data.DataLoader(test, batch_size=16)
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -97,7 +94,7 @@ def evaluate(model, test_data):
 
 if __name__ == '__main__':
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
+    tokenizer = BertTokenizer.from_pretrained('./resources/embedding/bert-base-chinese')
     #  读取数据集
     labels = {'news_story':0,
             'news_culture':1,
@@ -116,17 +113,18 @@ if __name__ == '__main__':
             'news_game':14
             }
 
-    df = pd.read_csv('../../modules/dataset/toutiao_cat_data.csv')
+    df = pd.read_csv('modules/dataset/toutiao_cat_data.csv')
     df = df.head(1600)  #时间原因，我只取了1600条训练
-    
+
     np.random.seed(112)
     df_train, df_val, df_test = np.split(df.sample(frac=1, random_state=42),
                                         [int(.8*len(df)), int(.9*len(df))])  # 拆分为训练集、验证集和测试集，比例为 80:10:10。
 
     EPOCHS = 10  # 训练轮数
-    model = BertClassifier()  # 定义的模型
+    # model = BertClassifier()  # 定义的模型
+    model = MLP(input_n=128, output_n=15)
     LR = 1e-6  # 学习率
-    Batch_Size = 16  # 看你的GPU，要合理取值
+    Batch_Size = 4  # 看你的GPU，要合理取值
     train(model, df_train, df_val, LR, EPOCHS, Batch_Size, labels, tokenizer)
     torch.save(model.state_dict(), 'BERT-toutiao.pt')
-    evaluate(model, df_test)
+    evaluate(model, df_test, labels, tokenizer)

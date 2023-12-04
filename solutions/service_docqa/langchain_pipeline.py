@@ -38,7 +38,7 @@ from langchain.vectorstores import chroma, Chroma
 embedding_mode_dict = {
     "ernie-tiny": "nghuyong/ernie-3.0-nano-tiny",
     # "text2vec3": "shibing624/text2vec-base-chinese"
-    "text2vec3": "text2vec3"
+    "text2vec3": "../../resources/model/text2vec3"
 }
 
 print("begin")
@@ -47,8 +47,6 @@ def load_documents(directory='books'):
     # loader = DirectoryLoader('三体', glob="*.py", show_progress=True, use_multithreading=True)
     loader = TextLoader('三体.txt', encoding='utf-8')
     documents = loader.load()
-    for document in documents:
-        print(document)
     text_spliter = CharacterTextSplitter(chunk_size=64, 
                                          chunk_overlap=0)
     split_docs = text_spliter.split_documents(documents)
@@ -63,8 +61,6 @@ def load_embedding_mode(model_name='shibing624/text2vec-base/chinese'):
                                  encode_kwargs=encode_kwargs)
 
 def store_chroma(docs, embeddings, persist_directory='VectorStore'):
-    print(docs)
-    print(embeddings)
     db = Chroma.from_documents(docs, embeddings, persist_directory)
     # db = Chroma
     db.persist()
@@ -79,33 +75,11 @@ print("end load embedding")
 db = store_chroma(documents, embeddings)
 print("end load db")
 
-# if not os.path.exists("VectorStore"):
-#     documents = load_documents()
-#     print("end load documents")
-#     db = store_chroma(documents, embeddings)
-#     print("end load db")
-# else:
-#     db = chroma(persisi_distory="VectorStore", embedding_function=embeddings)
-
-
-# def load_documents(directory="三体"):
-#     """
-#     加载books下的文件，进行拆分
-#     :param directory:
-#     :return:
-#     """
-#     loader = DirectoryLoader(directory)
-#     documents = loader.load()
-#     text_spliter = CharacterTextSplitter(chunk_size=256, chunk_overlap=0)
-#     split_docs = text_spliter.split_documents(documents)
-#     return split_docs
 
 def load_documents(directory='books'):
     # loader = DirectoryLoader('三体', glob="*.py", show_progress=True, use_multithreading=True)
-    loader = TextLoader('./三体/三体1.txt', encoding='utf-8')
+    loader = TextLoader('./三体.txt', encoding='utf-8')
     documents = loader.load()
-    for document in documents:
-        print(document)
     text_spliter = CharacterTextSplitter(chunk_size=32, 
                                          chunk_overlap=0)
     split_docs = text_spliter.split_documents(documents)

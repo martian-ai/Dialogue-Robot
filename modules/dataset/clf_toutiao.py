@@ -33,6 +33,7 @@ class Dataset_Toutiao(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         batch_texts = self.get_batch_texts(idx)
         batch_y = self.get_batch_labels(idx)
+        return batch_texts, batch_y
 
 def fetch_by_huggingface(name='fourteenBDr/toutiao'):
     """_summary_

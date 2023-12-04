@@ -15,29 +15,12 @@ from turtle import forward
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn import Linear, ReLU, Sequential, Dropout, Softmax
 from torch.autograd import Variable
 
 START_TAG = "<START>"
 STOP_TAG = "<STOP>"
 
-
-class MLP(nn.Module):
-    """_summary_
-
-    Args:
-        nn (_type_): _description_
-    """
-
-    def __init__(self):
-        super().__init__()
-
-    def forward(self):
-        pass
-
-
-import torch
-from torch.nn import Linear, ReLU, Sequential, Dropout, Softmax
-import torch.nn.functional as F
 
 class MLP(torch.nn.Module):
     """
@@ -49,7 +32,7 @@ class MLP(torch.nn.Module):
     Args:
         torch (_type_): _description_
     """
-    def __init__(self, input_n, output_n, num_layer=3, layer_list=[128, 64, 16], dropout=0.5):
+    def __init__(self, input_n, output_n, num_layer=3, layer_list=[64, 32, 15], dropout=0.5):
 
         """
         :param input_n: int 输入神经元个数
@@ -64,6 +47,8 @@ class MLP(torch.nn.Module):
         self.num_layer = num_layer
         self.layer_list = layer_list
 
+        self.emb = nn.Embedding(num_embeddings=30000, embedding_dim=input_n) # 加载有效的embedding
+
         # 输入层
         self.input_layer = Sequential(
             Linear(input_n, layer_list[0], bias=False),
@@ -71,10 +56,12 @@ class MLP(torch.nn.Module):
         )
 
         # 隐藏层
-        self.hidden_layer = Sequential()
+        self.hidden_layer = Sequential(Linear(layer_list[0], layer_list[1], bias=False), 
+                                       Linear(layer_list[1], layer_list[2], bias=False),
+                                       ReLU()) # TODO 1, 和 2 要进行修改
 
-        for index in range(num_layer-1):
-            self.hidden_layer.extend([Linear(layer_list[index], layer_list[index+1], bias=False), ReLU()])
+        # for index in range(num_layer-1):
+        #     self.hidden_layer.extend([Linear(layer_list[index], layer_list[index+1], bias=False), ])
 
         self.dropout = Dropout(dropout)
 
@@ -84,9 +71,13 @@ class MLP(torch.nn.Module):
             Softmax(dim=1),
         )
 
-    def forward(self, x):
-        input = self.input_layer(x)
-        hidden = self.hidden_layer(input)
+    def forward(self, x, mask=None): #mask 可以传入，但是不处理，兼容bert 的接口逻辑
+        input_emb = self.emb(x)
+        sentence_emb = input_emb[:, :, 0] # 切片，第三维只取第0 个元素，只取行首的字符表示作为句子的字符表示
+        input_1 = self.input_layer(sentence_emb)
+
+        # input_1 = self.input_layer(x)
+        hidden = self.hidden_layer(input_1)
         hidden = self.dropout(hidden)
         output = self.output_layer(hidden)
         return output
