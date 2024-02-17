@@ -194,6 +194,52 @@ class DynamicLSTM(nn.Module):
 
             return out, (ht, ct)
 
+class AttentionSelf(nn.Module):
+    """_summary_
+
+    Args:
+        nn (_type_): _description_
+    """
+
+    def __init__(self, input_dim, dim_k, dim_v):
+        """
+        self attetion 
+        x(input) : batch_size * seq_len * input_dim
+        超详细图解Self-Attention - 伟大是熬出来的的文章 - 知乎 https://zhuanlan.zhihu.com/p/410776234
+        """
+        super(AttentionSelf, self).__init__()
+        self.q = nn.Linear(input_dim, dim_k)
+        self.k = nn.Linear(input_dim, dim_k)
+        self.v = nn.Linear(input_dim, dim_v)
+        self._norm_fact = 1 / sqrt(dim_k)
+
+    def forward(self, x):
+        """
+        q : batch_size * input_dim * dim_k
+        k : batch_size * input_dim * dim_k
+        v : batch_size * input_dim * dim_v
+        """
+        Q = self.q(x)  # Q: batch_size * seq_len * dim_k
+        K = self.k(x)  # K: batch_size * seq_len * dim_k
+        V = self.v(x)  # V: batch_size * seq_len * dim_v
+
+        atten = nn.Softmax(dim=-1)(
+        torch.bmm(Q, K.permute(0, 2, 1))) * self._norm_fact  # Q * K.T() # batch_size * seq_len * seq_len
+        output = torch.bmm(atten, V)  # Q * K.T() * V # batch_size * seq_len * dim_v
+        return output
+
+class AttentionCross(nn.Module):
+    """_summary_
+
+    Args:
+        nn (_type_): _description_
+
+    Raises:
+        RuntimeError: _description_
+
+    Returns:
+        _type_: _description_
+    """
 
 class AttentionMulitHead(nn.Module):
 
@@ -313,38 +359,6 @@ class NoQueryAttention(AttentionMulitHead):
         q = self.q.expand(mb_size, -1, -1)
         return super(NoQueryAttention, self).forward(k, q)
 
-
-class AttentionSelf(nn.Module):
-
-    def __init__(self, input_dim, dim_k, dim_v):
-        """
-        self attetion 
-        x(input) : batch_size * seq_len * input_dim
-        超详细图解Self-Attention - 伟大是熬出来的的文章 - 知乎 https://zhuanlan.zhihu.com/p/410776234
-        """
-        super(AttentionSelf, self).__init__()
-        self.q = nn.Linear(input_dim, dim_k)
-        self.k = nn.Linear(input_dim, dim_k)
-        self.v = nn.Linear(input_dim, dim_v)
-        self._norm_fact = 1 / sqrt(dim_k)
-
-    def forward(self, x):
-        """
-        q : batch_size * input_dim * dim_k
-        k : batch_size * input_dim * dim_k
-        v : batch_size * input_dim * dim_v
-        """
-        Q = self.q(x)  # Q: batch_size * seq_len * dim_k
-        K = self.k(x)  # K: batch_size * seq_len * dim_k
-        V = self.v(x)  # V: batch_size * seq_len * dim_v
-
-        atten = nn.Softmax(dim=-1)(
-            torch.bmm(Q, K.permute(0, 2, 1))
-        ) * self._norm_fact  # Q * K.T() # batch_size * seq_len * seq_len
-        output = torch.bmm(atten,
-                           V)  # Q * K.T() * V # batch_size * seq_len * dim_v
-
-        return output
 
 
 class AttentionSeq2Seq(nn.Module):
@@ -586,12 +600,6 @@ class TextCNN(nn.Module):
         # kernal_size = (K,D)
         self.dropout = nn.Dropout(dropout)
         self.fc = nn.Linear(len(kernel_sizes) * kernel_dim, output_size)
-
-
-#     def init_weights(self, pretrained_word_vectors, is_static=False):
-#         self.embedding.weight = nn.Parameter(torch.from_numpy(pretrained_word_vectors).float())
-#         if is_static:#这里不使用预训练的词向量
-#             self.embedding.weight.requires_grad = False
 
     def forward(self, inputs, is_training=False):
         inputs = self.embedding(inputs).unsqueeze(1)  # (B,1,T,D)

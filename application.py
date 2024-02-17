@@ -17,6 +17,7 @@ from flask_cors import CORS
 
 from modules.structure_document.base_doc import BaseDoc
 from solutions.service_faq.FAQRecall import recallerFAQ
+from solutions.service_docqa.pipeline_langchain 
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -111,6 +112,15 @@ Part IV doc qa
 输入一篇或者一系列文档，根据文档进行应答
 单轮或者多轮
 """
+# @app.route('/doc_qa', methods=['GET', 'POST'])
+def interface_doc_qa():
+    """"Doc QA service."""
+    query = request.args.get("query")
+    session = request.args.get("session")
+    answer = get_doc_qa_answer(query, session)
+    return answer
+    
+
 """
 Part V orqa
 根据开发域数据进行相关爬虫
